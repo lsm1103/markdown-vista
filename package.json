@@ -1,0 +1,137 @@
+{
+  "name": "markdown-vista",
+  "displayName": "Markdown Vista",
+  "description": "Enhances the built-in Markdown preview: Mermaid diagrams, extended syntax, and a zoom/pan viewer for every diagram, image and formula.",
+  "version": "0.4.0",
+  "publisher": "moji",
+  "license": "MIT",
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "markdown",
+    "mermaid",
+    "preview",
+    "zoom",
+    "diagram"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "contributes": {
+    "markdown.markdownItPlugins": true,
+    "markdown.previewScripts": [
+      "./media/preview.js"
+    ],
+    "markdown.previewStyles": [
+      "./media/preview.css"
+    ],
+    "configuration": {
+      "title": "Markdown Vista",
+      "properties": {
+        "markdownVista.mermaid.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render ```mermaid code fences as diagrams in the Markdown preview."
+        },
+        "markdownVista.extendedSyntax.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ==mark==, ++ins++, ~sub~, ^sup^, footnotes, definition lists, abbreviations and :emoji: shortcodes. (Math, task lists and heading anchors are already built into VS Code.)"
+        },
+        "markdownVista.toc.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the table-of-contents button in the Markdown preview."
+        },
+        "markdownVista.toc.openByDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open the table of contents automatically when a preview opens."
+        },
+        "markdownVista.toc.maxLevel": {
+          "type": "number",
+          "default": 6,
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Deepest heading level listed in the table of contents."
+        },
+        "markdownVista.viewer.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Click a diagram, image or formula in the preview to open the zoom/pan viewer."
+        },
+        "markdownVista.viewer.includeImages": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include plain images (png/jpg/webp/svg) in the zoom viewer."
+        },
+        "markdownVista.viewer.includeMath": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include KaTeX display formulas in the zoom viewer."
+        },
+        "markdownVista.viewer.minimap": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the navigation minimap while zoomed in."
+        },
+        "markdownVista.viewer.pngExport": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "download",
+            "clipboard",
+            "off"
+          ],
+          "enumDescriptions": [
+            "Try a real file download first, fall back to copying to the clipboard.",
+            "Always use a file download (may be blocked by the preview's security policy).",
+            "Always copy the PNG to the clipboard.",
+            "Hide the PNG export button."
+          ],
+          "default": "auto",
+          "description": "How the viewer exports the current graphic as a PNG."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "verify": "node scripts/verify.mjs",
+    "package": "npm run build && npm run verify && npx --yes @vscode/vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build",
+    "harness": "node scripts/harness.mjs",
+    "test": "node scripts/test-render.mjs"
+  },
+  "dependencies": {
+    "markdown-it-abbr": "^2.0.0",
+    "markdown-it-deflist": "^3.0.0",
+    "markdown-it-emoji": "^3.0.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-ins": "^4.0.0",
+    "markdown-it-mark": "^4.0.0",
+    "markdown-it-sub": "^2.0.0",
+    "markdown-it-sup": "^2.0.0",
+    "mermaid": "^10.9.6"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "markdown-it": "^14.3.0",
+    "typescript": "^5.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexishida/Moji.git"
+  }
+}

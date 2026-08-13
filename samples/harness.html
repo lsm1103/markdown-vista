@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Markdown Vista — preview harness</title>
+    <!--
+      Stands in for VS Code's built-in Markdown preview so the bundled
+      media/preview.js can be exercised in a real browser: same body classes,
+      same --vscode-* tokens, same shape of rendered HTML.
+      Served by `npm run harness`.
+    -->
+    <style>
+      :root {
+        --vscode-font-family: system-ui, sans-serif;
+        --vscode-font-size: 13px;
+        --vscode-editor-font-family: monospace;
+        --vscode-foreground: #ccc;
+        --vscode-editor-background: #1f1f1f;
+        --vscode-editorWidget-background: #252526;
+        --vscode-panel-border: #3a3a3a;
+        --vscode-widget-border: #3a3a3a;
+        --vscode-focusBorder: #007fd4;
+        --vscode-toolbar-hoverBackground: #333;
+        --vscode-textCodeBlock-background: #2a2a2a;
+        --vscode-button-background: #0e639c;
+        --vscode-button-foreground: #fff;
+        --vscode-dropdown-background: #2a2a2a;
+        --vscode-dropdown-foreground: #ccc;
+        --vscode-dropdown-border: #3a3a3a;
+        --vscode-editorWarning-foreground: #cca700;
+        --vscode-editor-findMatchHighlightBackground: rgba(234, 92, 0, 0.33);
+      }
+      body {
+        margin: 0;
+        padding: 24px 40px;
+        background: var(--vscode-editor-background);
+        color: var(--vscode-foreground);
+        font-family: var(--vscode-font-family);
+      }
+      pre code {
+        font-family: monospace;
+      }
+    </style>
+    <link rel="stylesheet" href="../media/preview.css" />
+  </head>
+  <body class="vscode-body vscode-dark">
+    <div id="markdown-vista-config" data-markdown-vista-config='{"viewerEnabled":true,"includeImages":true,"includeMath":true,"minimap":true,"mermaidEnabled":true,"pngExport":"auto"}' aria-hidden="true"></div>
+
+    <h1 class="code-line" data-line="0">Harness</h1>
+
+    <pre class="mermaid-diagram-candidate code-line" data-line="2"><code>graph TD
+  A[Start] --&gt; B{Works?}
+  B --&gt;|yes| C[Ship it]
+  B --&gt;|no| D[Fix it]
+  D --&gt; A</code></pre>
+
+    <pre class="mermaid-diagram-candidate code-line" data-line="10"><code>sequenceDiagram
+  title Login flow
+  User->>App: credentials
+  App->>Auth: verify
+  Auth-->>App: token
+  App-->>User: session</code></pre>
+
+    <pre class="mermaid-diagram-candidate code-line" data-line="20"><code>this is not a valid diagram at all</code></pre>
+
+    <p class="code-line" data-line="26">
+      <img src="pixel.svg" alt="Sample image" width="240" />
+    </p>
+
+    <p class="code-line" data-line="28">
+      Extended syntax: <mark>marked</mark>, <ins>inserted</ins>, H<sub>2</sub>O, x<sup>2</sup>.
+    </p>
+
+    <h2 class="code-line" data-line="30">Architecture</h2>
+    <p>Extension host renders, preview script enhances.</p>
+    <h3 class="code-line" data-line="34">Extension host</h3>
+    <p>markdown-it plugins and the mermaid fence placeholder.</p>
+    <h4 class="code-line" data-line="38">Config bridge</h4>
+    <p>Settings ride along in a data attribute.</p>
+    <h3 class="code-line" data-line="42">Preview script</h3>
+    <p>Mermaid, the zoom viewer and this table of contents.</p>
+    <h2 class="code-line" data-line="46">Limitations</h2>
+    <p style="height: 700px">Long section so the active heading can be observed while scrolling.</p>
+    <h2 class="code-line" data-line="50">Limitations</h2>
+    <p>A duplicated heading, to check that keys stay unique.</p>
+    <h6 class="code-line" data-line="54">Deep heading</h6>
+    <p style="height: 600px">Filler.</p>
+
+    <script src="../media/preview.js"></script>
+  </body>
+</html>

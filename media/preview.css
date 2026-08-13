@@ -1,0 +1,597 @@
+/* Markdown Vista — preview styles.
+   Injected into VS Code's built-in Markdown preview via `markdown.previewStyles`.
+   Every colour is a --vscode-* token so the sheet follows the user's theme
+   instead of fighting it. Deliberately narrow: base typography, tables, code
+   highlighting and layout stay owned by the built-in preview. */
+
+#markdown-vista-config {
+  display: none;
+}
+
+/* --- Mermaid ------------------------------------------------------------ */
+
+.mermaid-diagram {
+  margin: 1.1em 0;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  border-radius: 6px;
+  background: var(--vscode-textCodeBlock-background, rgba(128, 128, 128, 0.1));
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* A diagram Mermaid rejected stays a plain code block, with a hint. */
+pre.mermaid-diagram-failed {
+  border-left: 3px solid var(--vscode-editorWarning-foreground, #cca700);
+}
+
+pre.mermaid-diagram-failed::before {
+  content: 'mermaid — could not be rendered';
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  opacity: 0.8;
+  color: var(--vscode-editorWarning-foreground, #cca700);
+}
+
+/* Un-rendered fences must not flash as raw text before Mermaid loads. */
+pre.mermaid-diagram-candidate:not([data-markdown-vista-state='failed']) {
+  visibility: hidden;
+  max-height: 4em;
+  overflow: hidden;
+}
+
+/* --- Extended syntax ---------------------------------------------------- */
+
+mark {
+  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.footnotes {
+  border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  margin-top: 2em;
+  padding-top: 0.6em;
+  font-size: 0.92em;
+}
+
+dl dt {
+  font-weight: 600;
+  margin-top: 0.7em;
+}
+
+dl dd {
+  margin: 0.2em 0 0 1.4em;
+}
+
+/* --- Zoom affordance ---------------------------------------------------- */
+
+.markdown-vista-zoomable {
+  cursor: zoom-in;
+}
+
+.markdown-vista-zoomable:hover {
+  outline: 2px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Our own chrome is UI, not content. The script already excludes it from the
+   zoomable set; this makes a regression cosmetic instead of behavioural. */
+.markdown-vista-toc .markdown-vista-zoomable,
+.markdown-vista-viewer .markdown-vista-zoomable,
+.markdown-vista-toc-toggle.markdown-vista-zoomable,
+.markdown-vista-toc-toggle .markdown-vista-zoomable {
+  cursor: inherit;
+}
+
+.markdown-vista-toc .markdown-vista-zoomable:hover,
+.markdown-vista-viewer .markdown-vista-zoomable:hover,
+.markdown-vista-toc-toggle.markdown-vista-zoomable:hover,
+.markdown-vista-toc-toggle .markdown-vista-zoomable:hover {
+  outline: none;
+}
+
+body.markdown-vista-viewer-open {
+  overflow: hidden;
+}
+
+/* --- Table of contents -------------------------------------------------- */
+
+.markdown-vista-toc-toggle {
+  position: fixed;
+  top: 12px;
+  right: 22px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  color: var(--vscode-foreground);
+  opacity: 0.75;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+
+.markdown-vista-toc-toggle:hover,
+.markdown-vista-toc-toggle--active {
+  opacity: 1;
+}
+
+.markdown-vista-toc-toggle--active {
+  border-color: var(--vscode-focusBorder, #007fd4);
+  color: var(--vscode-textLink-foreground, #3794ff);
+}
+
+.markdown-vista-toc-toggle:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+.markdown-vista-toc-toggle[hidden] {
+  display: none;
+}
+
+.markdown-vista-toc {
+  position: fixed;
+  top: 50px;
+  right: 22px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  width: 290px;
+  max-width: calc(100vw - 44px);
+  max-height: calc(100vh - 74px);
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.32);
+  font-family: var(--vscode-font-family);
+  font-size: 0.92em;
+  color: var(--vscode-foreground);
+  cursor: default;
+  overflow: hidden;
+}
+
+.markdown-vista-toc[hidden] {
+  display: none;
+}
+
+.markdown-vista-toc__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 12px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.markdown-vista-toc__title {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+}
+
+.markdown-vista-toc__count {
+  margin-right: auto;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.markdown-vista-toc__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.markdown-vista-toc__btn:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.markdown-vista-toc__btn[hidden] {
+  display: none;
+}
+
+.markdown-vista-toc__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.markdown-vista-toc > .markdown-vista-toc__list {
+  padding: 6px 6px 10px;
+}
+
+.markdown-vista-toc__list .markdown-vista-toc__list {
+  padding-left: 13px;
+  border-left: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.28));
+  margin-left: 10px;
+  overflow: visible;
+}
+
+.markdown-vista-toc__item {
+  margin: 0;
+}
+
+.markdown-vista-toc__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.markdown-vista-toc__caret,
+.markdown-vista-toc__caret-spacer {
+  flex: none;
+  width: 18px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.markdown-vista-toc__caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.markdown-vista-toc__caret svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.12s ease;
+}
+
+.markdown-vista-toc__caret--open svg {
+  transform: rotate(90deg);
+}
+
+.markdown-vista-toc__caret:hover {
+  opacity: 1;
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.markdown-vista-toc__caret-spacer {
+  display: inline-block;
+}
+
+.markdown-vista-toc__link {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.markdown-vista-toc__link:hover {
+  background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.16));
+  color: inherit;
+  text-decoration: none;
+}
+
+.markdown-vista-toc__link:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+.markdown-vista-toc__link--active {
+  background: var(--vscode-list-activeSelectionBackground, rgba(55, 148, 255, 0.25));
+  color: var(--vscode-list-activeSelectionForeground, inherit);
+  font-weight: 600;
+}
+
+.markdown-vista-toc__item[data-level='1'] > .markdown-vista-toc__row > .markdown-vista-toc__link {
+  font-weight: 600;
+}
+
+.markdown-vista-toc__empty {
+  margin: 0;
+  padding: 14px 12px;
+  opacity: 0.7;
+}
+
+.markdown-vista-toc__empty[hidden] {
+  display: none;
+}
+
+@media print {
+  .markdown-vista-toc,
+  .markdown-vista-toc-toggle {
+    display: none;
+  }
+}
+
+/* --- Viewer ------------------------------------------------------------- */
+
+.markdown-vista-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+  color: var(--vscode-foreground);
+}
+
+.markdown-vista-viewer[hidden] {
+  display: none;
+}
+
+.markdown-vista-viewer__modal {
+  display: flex;
+  flex-direction: column;
+  width: min(1200px, 100%);
+  height: min(860px, 100%);
+  min-width: 420px;
+  min-height: 320px;
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  border-radius: 8px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.markdown-vista-viewer__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+
+.markdown-vista-viewer__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.markdown-vista-viewer__title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.markdown-vista-viewer__nav,
+.markdown-vista-viewer__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.markdown-vista-viewer__nav {
+  margin-left: auto;
+}
+
+.markdown-vista-viewer__count {
+  min-width: 3.2em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.markdown-vista-viewer__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+}
+
+.markdown-vista-viewer__btn:hover:not(:disabled) {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.markdown-vista-viewer__btn:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: 1px;
+}
+
+.markdown-vista-viewer__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.markdown-vista-viewer__btn[hidden] {
+  display: none;
+}
+
+.markdown-vista-viewer__zoom {
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid var(--vscode-dropdown-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+  border-radius: 4px;
+  background: var(--vscode-dropdown-background, var(--vscode-editor-background));
+  color: var(--vscode-dropdown-foreground, var(--vscode-foreground));
+  font-family: inherit;
+  font-size: 0.92em;
+}
+
+.markdown-vista-viewer__stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  background: var(--vscode-editor-background);
+  background-image:
+    linear-gradient(45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(128, 128, 128, 0.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(128, 128, 128, 0.08) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.markdown-vista-viewer__stage--dragging {
+  cursor: grabbing;
+}
+
+.markdown-vista-viewer__canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.markdown-vista-viewer__canvas svg,
+.markdown-vista-viewer__canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* --- Minimap ------------------------------------------------------------ */
+
+.markdown-vista-viewer__minimap {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 160px;
+  height: 110px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.4));
+  border-radius: 5px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  opacity: 0.94;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.markdown-vista-viewer__minimap[hidden] {
+  display: none;
+}
+
+.markdown-vista-viewer__minimap-canvas {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.markdown-vista-viewer__minimap-canvas svg,
+.markdown-vista-viewer__minimap-canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.markdown-vista-viewer__minimap-viewport {
+  position: absolute;
+  border: 1.5px solid var(--vscode-focusBorder, #007fd4);
+  background: color-mix(in srgb, var(--vscode-focusBorder, #007fd4) 16%, transparent);
+  pointer-events: none;
+}
+
+/* --- Toast -------------------------------------------------------------- */
+
+.markdown-vista-viewer__toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  font-size: 0.92em;
+}
+
+.markdown-vista-viewer__toast[hidden] {
+  display: none;
+}
+
+.markdown-vista-viewer__toast-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: none;
+  border-radius: 4px;
+  background: var(--vscode-button-background, #0e639c);
+  color: var(--vscode-button-foreground, #fff);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.markdown-vista-viewer__toast-action:hover {
+  background: var(--vscode-button-hoverBackground, #1177bb);
+}
+
+/* --- Resize handles ----------------------------------------------------- */
+
+.markdown-vista-viewer__resize {
+  position: absolute;
+  touch-action: none;
+}
+
+.markdown-vista-viewer__resize--n { top: -3px; left: 12px; right: 12px; height: 8px; cursor: ns-resize; }
+.markdown-vista-viewer__resize--s { bottom: -3px; left: 12px; right: 12px; height: 8px; cursor: ns-resize; }
+.markdown-vista-viewer__resize--w { left: -3px; top: 12px; bottom: 12px; width: 8px; cursor: ew-resize; }
+.markdown-vista-viewer__resize--e { right: -3px; top: 12px; bottom: 12px; width: 8px; cursor: ew-resize; }
+.markdown-vista-viewer__resize--nw { top: -3px; left: -3px; width: 14px; height: 14px; cursor: nwse-resize; }
+.markdown-vista-viewer__resize--se { bottom: -3px; right: -3px; width: 14px; height: 14px; cursor: nwse-resize; }
+.markdown-vista-viewer__resize--ne { top: -3px; right: -3px; width: 14px; height: 14px; cursor: nesw-resize; }
+.markdown-vista-viewer__resize--sw { bottom: -3px; left: -3px; width: 14px; height: 14px; cursor: nesw-resize; }
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown-vista-viewer__canvas {
+    will-change: auto;
+  }
+}

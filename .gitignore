@@ -1,0 +1,5 @@
+node_modules/
+dist/
+media/preview.js
+media/*.map
+*.vsix
