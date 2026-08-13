@@ -3,7 +3,7 @@
   "displayName": "Markdown Vista",
   "description": "Enhances the built-in Markdown preview: Mermaid diagrams, extended syntax, and a zoom/pan viewer for every diagram, image and formula.",
   "version": "0.4.0",
-  "publisher": "moji",
+  "publisher": "xiaomina1103",
   "license": "MIT",
   "categories": [
     "Programming Languages",
@@ -129,9 +129,5 @@
     "esbuild": "^0.24.0",
     "markdown-it": "^14.3.0",
     "typescript": "^5.6.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/alexishida/Moji.git"
   }
 }
