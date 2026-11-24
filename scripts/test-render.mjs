@@ -35,6 +35,7 @@ const settings = new Map(
     'viewer.includeMath': true,
     'viewer.minimap': true,
     'viewer.pngExport': 'auto',
+    'docLinks.enabled': true,
     'toc.enabled': true,
     'toc.openByDefault': false,
     'toc.maxLevel': 6
@@ -102,6 +103,34 @@ for (const [name, source, expected] of cases) {
 
 const abbr = md.render('*[HTML]: HyperText Markup Language\n\nThe HTML spec')
 expect('abbreviation', abbr.includes('<abbr title="HyperText Markup Language">HTML</abbr>'), abbr)
+
+// --- document references ---------------------------------------------------
+
+const docLink = md.render('详见《技术治理_待删清单.md》，以及《a/b.md》。')
+expect('doc reference becomes a link', docLink.includes('href="%E6%8A%80'), docLink.trim())
+expect('doc reference keeps its brackets in the text', docLink.includes('》</a>'), docLink.trim())
+expect('two references on one line', (docLink.match(/markdown-vista-doc-link/g) ?? []).length === 2, docLink.trim())
+
+const relative = md.render('见《docs/design.md》')
+expect('relative path is preserved', relative.includes('href="docs/design.md"'), relative.trim())
+
+const inCode = md.render('`《design.md》`')
+expect('code spans are untouched', !inCode.includes('<a '), inCode.trim())
+
+const inLink = md.render('[《design.md》](https://example.com)')
+expect('existing links are untouched', (inLink.match(/<a /g) ?? []).length === 1, inLink.trim())
+
+const notMd = md.render('见《某个规范》')
+expect('non-markdown references are untouched', !notMd.includes('<a '), notMd.trim())
+
+settings.set('docLinks.enabled', false)
+const disabled = md.render('见《design.md》')
+expect(
+  'doc links can be disabled',
+  !disabled.includes('markdown-vista-doc-link'),
+  disabled.trim()
+)
+settings.set('docLinks.enabled', true)
 
 // --- things VS Code already owns must NOT be duplicated --------------------
 

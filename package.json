@@ -2,7 +2,7 @@
   "name": "markdown-vista",
   "displayName": "Markdown Vista",
   "description": "Enhances the built-in Markdown preview: Mermaid diagrams, extended syntax, and a zoom/pan viewer for every diagram, image and formula.",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "publisher": "xiaomina1103",
   "license": "MIT",
   "categories": [
@@ -97,9 +97,76 @@
           ],
           "default": "auto",
           "description": "How the viewer exports the current graphic as a PNG."
+        },
+        "markdownVista.mermaid.errorDetails": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Mermaid parser error and line number when a diagram fails, instead of a generic message."
+        },
+        "markdownVista.code.copyButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a copy button on code blocks."
+        },
+        "markdownVista.code.foldOver": {
+          "type": "number",
+          "default": 60,
+          "minimum": 0,
+          "description": "Collapse code blocks longer than this many lines. 0 disables folding."
+        },
+        "markdownVista.docLinks.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Turn plain-text references to other Markdown files into links."
+        },
+        "markdownVista.docLinks.pattern": {
+          "type": "string",
+          "default": "《([^》]+?\\.md)》",
+          "description": "Regular expression matching a document reference. The first capture group is the file path, resolved relative to the current document."
+        },
+        "markdownVista.reading.maxWidth": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "description": "Maximum width of body text in pixels; code blocks, tables and diagrams stay full width. 0 uses the full pane."
+        },
+        "markdownVista.breadcrumb.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the path of the current section in a bar at the top of the preview."
+        },
+        "markdownVista.sectionFolding.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a fold control on headings to collapse a section in the preview."
+        },
+        "markdownVista.toc.jumpStrategy": {
+          "type": "string",
+          "enum": [
+            "guard",
+            "anchor"
+          ],
+          "enumDescriptions": [
+            "Scroll to the heading and hold the position against anything that scrolls it away.",
+            "Navigate to the heading anchor and let the built-in preview do the scrolling."
+          ],
+          "default": "guard",
+          "description": "How clicking a table-of-contents entry moves the preview."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "markdownVista.exportHtml",
+        "title": "Export to Self-Contained HTML",
+        "category": "Markdown Vista"
+      },
+      {
+        "command": "markdownVista.insertToc",
+        "title": "Insert Table of Contents",
+        "category": "Markdown Vista"
+      }
+    ]
   },
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -109,7 +176,7 @@
     "package": "npm run build && npm run verify && npx --yes @vscode/vsce package --no-dependencies",
     "vscode:prepublish": "npm run build",
     "harness": "node scripts/harness.mjs",
-    "test": "node scripts/test-render.mjs"
+    "test": "node scripts/test-render.mjs && node scripts/test-host.mjs"
   },
   "dependencies": {
     "markdown-it-abbr": "^2.0.0",
@@ -120,7 +187,7 @@
     "markdown-it-mark": "^4.0.0",
     "markdown-it-sub": "^2.0.0",
     "markdown-it-sup": "^2.0.0",
-    "mermaid": "^10.9.6"
+    "mermaid": "^11.16.1"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",

@@ -9,9 +9,16 @@ Derived from the rendering and diagram-viewer core of
 
 | | |
 |---|---|
-| **Mermaid diagrams** | ```` ```mermaid ```` fences render as diagrams, themed to your color theme, re-rendered when you switch themes. An invalid diagram degrades to a normal code block. |
-| **Zoom / pan viewer** | Click any diagram, image or display formula: a resizable viewer with 10%–1000% zoom, drag-to-pan, a navigation minimap, keyboard control and PNG export. |
-| **Table of contents** | A button in the top-right corner of the preview opens a nested heading outline: click to jump, collapsible branches, and the current section highlights as you scroll. |
+| **Mermaid diagrams** | ```` ```mermaid ```` fences render as diagrams (Mermaid 11), themed to your color theme and re-rendered when you switch themes. An invalid diagram degrades to a normal code block carrying the parser's own error and line number. Mermaid is loaded only when a document actually contains a diagram. |
+| **Zoom / pan viewer** | Click any diagram, image or display formula: a resizable viewer with 10%–1000% zoom, drag-to-pan, a navigation minimap, keyboard control, PNG and SVG export, and the Mermaid source behind the diagram. |
+| **Code blocks** | A copy button on every block, and a fold control on blocks longer than 60 lines so a long configuration listing stops burying the prose around it. |
+| **Document references** | Plain-text mentions of another Markdown file — `《design.md》` by default, the pattern is configurable — become links that open the file. |
+| **Breadcrumb** | A bar at the top of the preview showing the path of the section being read; click any level to jump to it. |
+| **Section folding** | A fold control on every heading collapses that section in the preview. Independent of the drawer's collapsed branches, so navigating the outline never hides the text. |
+| **Reading width** | An optional cap on body-text width; code, tables and diagrams keep the full pane. |
+| **Export** | `Markdown Vista: Export to Self-Contained HTML` writes one HTML file with diagrams rendered and images inlined, for people who do not have VS Code. |
+| **Insert table of contents** | `Markdown Vista: Insert Table of Contents` writes a linked outline into the document itself, for renderers that have no drawer. |
+| **Table of contents** | A left drawer with the nested heading outline: click to jump, filter by name, collapsible branches, and the current section highlights as you scroll. It reserves space beside the text on a wide pane and floats over it on a narrow one. Drag its edge to resize; open state, width and collapsed branches are remembered. |
 | **Extended syntax** | `==mark==`, `++ins++`, `~sub~`, `^sup^`, footnotes, definition lists, abbreviations, `:emoji:`. |
 
 ## What it deliberately does **not** add
@@ -25,7 +32,7 @@ VS Code's preview already does these, and a second implementation would conflict
 ## Install
 
 ```bash
-code --install-extension markdown-vista-0.4.0.vsix
+code --install-extension markdown-vista-0.6.0.vsix
 ```
 
 Then open any Markdown file and hit the preview (`Cmd/Ctrl+Shift+V`).
@@ -41,6 +48,16 @@ Then open any Markdown file and hit the preview (`Cmd/Ctrl+Shift+V`).
 | wheel | zoom |
 | drag | pan |
 
+## Keyboard (table of contents)
+
+With the filter box focused:
+
+| Key | Action |
+|---|---|
+| `↑` `↓` | move through the filtered headings |
+| `Enter` | jump to the highlighted heading |
+| `Esc` | clear the filter, then close the drawer |
+
 ## Settings
 
 | Setting | Default | |
@@ -48,8 +65,17 @@ Then open any Markdown file and hit the preview (`Cmd/Ctrl+Shift+V`).
 | `markdownVista.mermaid.enabled` | `true` | render mermaid fences |
 | `markdownVista.extendedSyntax.enabled` | `true` | mark/ins/sub/sup/footnotes/deflist/abbr/emoji — **needs a window reload** |
 | `markdownVista.toc.enabled` | `true` | show the table-of-contents button |
-| `markdownVista.toc.openByDefault` | `false` | open the panel when a preview opens |
+| `markdownVista.toc.openByDefault` | `false` | open the drawer for a preview that has no remembered state yet |
 | `markdownVista.toc.maxLevel` | `6` | deepest heading level listed |
+| `markdownVista.toc.jumpStrategy` | `guard` | `guard` scrolls and holds the position; `anchor` hands navigation to the built-in preview |
+| `markdownVista.mermaid.errorDetails` | `true` | show the parser error on a failed diagram |
+| `markdownVista.code.copyButton` | `true` | copy button on code blocks |
+| `markdownVista.code.foldOver` | `60` | fold code blocks longer than this; `0` disables |
+| `markdownVista.docLinks.enabled` | `true` | link plain-text document references |
+| `markdownVista.docLinks.pattern` | `《([^》]+?\.md)》` | what a reference looks like; group 1 is the path |
+| `markdownVista.reading.maxWidth` | `0` | cap body-text width in pixels; `0` uses the full pane |
+| `markdownVista.breadcrumb.enabled` | `true` | current-section bar at the top |
+| `markdownVista.sectionFolding.enabled` | `true` | fold controls on headings |
 | `markdownVista.viewer.enabled` | `true` | click-to-zoom |
 | `markdownVista.viewer.includeImages` | `true` | include plain images |
 | `markdownVista.viewer.includeMath` | `true` | include display formulas |
@@ -85,6 +111,13 @@ If the preview shows no diagrams or no table-of-contents button, run
 Installing a new VSIX always needs **Developer: Reload Window** before the
 preview picks up the new scripts and styles.
 
+## Commands
+
+| Command | |
+|---|---|
+| `Markdown Vista: Export to Self-Contained HTML` | One HTML file: diagrams rendered to SVG, images inlined as data URIs, styles embedded. A render window opens briefly — that is where Mermaid runs. KaTeX formulas are exported without KaTeX's stylesheet, so math is the one thing that does not survive. |
+| `Markdown Vista: Insert Table of Contents` | Writes a linked outline at the cursor, wrapped in `<!-- markdown-vista-toc -->` markers. Running it again updates that block in place. |
+
 ## Conflicts
 
 Disable other extensions that also render Mermaid or math in the Markdown preview
@@ -96,9 +129,9 @@ the same fence.
 
 ```bash
 npm install
-npm run build          # dist/extension.js + media/preview.js
+npm run build          # dist/extension.js + media/{preview,mermaid,export-runner}.js
 npm run typecheck
-node scripts/test-render.mjs   # markdown-it pipeline tests
+npm test               # markdown-it pipeline + host helper tests
 npm run verify         # asserts the built artefacts (bundling, CSP, fallbacks)
 npm run harness        # browser harness for media/preview.js
 npm run package        # → markdown-vista-<version>.vsix
@@ -110,8 +143,11 @@ Press `F5` in VS Code to launch an Extension Development Host.
 
 ```
 src/extension.ts        activate() → { extendMarkdownIt }   (extension host, Node)
+src/host/               commands that need the workspace: export, insert TOC
 src/markdown-plugins.ts markdown-it plugins + mermaid fence + config bridge
 src/preview/main.ts     entry point for the preview webview  (bundled to media/preview.js)
+src/preview/navigate.ts heading jumps + the position guard, shared by drawer and breadcrumb
+src/preview/headings.ts heading collection shared by drawer, breadcrumb and folding
 src/preview/mermaid.ts  client-side Mermaid rendering + cache + theme refresh
 src/preview/viewer.ts   zoom/pan/minimap/export viewer
 src/preview/toc.ts      in-preview table of contents
@@ -121,9 +157,16 @@ media/preview.css       --vscode-* themed styles
 Settings reach the preview through a `data-markdown-vista-config` attribute injected into
 the rendered HTML, since the preview script cannot read the VS Code API.
 
-The preview bundle is built as a single IIFE with `splitting: false` so
-esbuild inlines `import('mermaid')`. A surviving chunk would be requested
-against the `vscode-webview://` origin and fail — `npm run verify` asserts this.
+Mermaid ships as a second IIFE (`media/mermaid.js`) that publishes itself on
+`window`, injected as a plain `<script>` only when a document contains a
+diagram — esbuild's code splitting would emit ESM whose relative imports
+resolve against the `vscode-webview://` origin and fail. The loader copies the
+preview's nonce so a nonce-based content security policy still admits it.
+`npm run verify` asserts the split and the size of the always-loaded script.
+
+Export renders in a webview the extension creates itself, which — unlike the
+built-in preview — has a message channel back to the host. That is the only way
+to get Mermaid SVG out of a browser and into a file.
 
 ## License
 

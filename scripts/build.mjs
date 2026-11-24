@@ -22,17 +22,7 @@ const extensionConfig = {
   logLevel: 'info'
 }
 
-/**
- * Runs inside the built-in Markdown preview's webview.
- *
- * `format: 'iife'` with splitting disabled is what makes esbuild inline the
- * `import('mermaid')` call into this single file. A separate chunk would be
- * requested relative to the `vscode-webview://` origin and fail to load — the
- * classic reason Mermaid silently does not render in a preview script.
- */
-const previewConfig = {
-  entryPoints: [resolve(root, 'src/preview/main.ts')],
-  outfile: resolve(root, 'media/preview.js'),
+const browser = {
   bundle: true,
   splitting: false,
   platform: 'browser',
@@ -48,11 +38,46 @@ const previewConfig = {
   logLevel: 'info'
 }
 
+/**
+ * Runs inside the built-in Markdown preview's webview. Every preview loads it,
+ * so Mermaid is deliberately *not* part of it — see below.
+ */
+const previewConfig = {
+  ...browser,
+  entryPoints: [resolve(root, 'src/preview/main.ts')],
+  outfile: resolve(root, 'media/preview.js')
+}
+
+/**
+ * Mermaid, split out and loaded on demand by `assets.ts` when a document
+ * actually contains a diagram.
+ *
+ * It is a separate *entry point*, not a code-splitting chunk: esbuild's
+ * splitting emits ESM with relative imports, which resolve against the
+ * `vscode-webview://` origin and fail. A standalone IIFE that publishes a
+ * global can be injected as a plain `<script>` instead.
+ */
+const mermaidConfig = {
+  ...browser,
+  entryPoints: [resolve(root, 'src/preview/mermaid-chunk.ts')],
+  outfile: resolve(root, 'media/mermaid.js'),
+  globalName: 'markdownVistaMermaid'
+}
+
+/** Runs in the throw-away webview the export command drives. */
+const exportRunnerConfig = {
+  ...browser,
+  entryPoints: [resolve(root, 'src/preview/export-runner.ts')],
+  outfile: resolve(root, 'media/export-runner.js')
+}
+
+const configs = [extensionConfig, previewConfig, mermaidConfig, exportRunnerConfig]
+
 if (watch) {
-  const contexts = await Promise.all([context(extensionConfig), context(previewConfig)])
+  const contexts = await Promise.all(configs.map((config) => context(config)))
   await Promise.all(contexts.map((ctx) => ctx.watch()))
   console.log('watching…')
 } else {
-  await Promise.all([build(extensionConfig), build(previewConfig)])
+  await Promise.all(configs.map((config) => build(config)))
   console.log('build complete')
 }

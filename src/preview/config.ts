@@ -9,7 +9,14 @@ const DEFAULTS: PreviewConfig = {
   pngExport: 'auto',
   tocEnabled: true,
   tocOpenByDefault: false,
-  tocMaxLevel: 6
+  tocMaxLevel: 6,
+  tocJumpStrategy: 'guard',
+  mermaidErrorDetails: true,
+  codeCopyButton: true,
+  codeFoldOver: 60,
+  readingMaxWidth: 0,
+  breadcrumbEnabled: true,
+  sectionFoldingEnabled: true
 }
 
 /**

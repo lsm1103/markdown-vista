@@ -1,5 +1,8 @@
 node_modules/
 dist/
 media/preview.js
+media/mermaid.js
+media/export-runner.js
 media/*.map
 *.vsix
+.DS_Store

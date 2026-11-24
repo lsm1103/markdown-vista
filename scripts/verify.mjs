@@ -24,10 +24,22 @@ const previewPath = resolve(root, 'media/preview.js')
 const preview = readFileSync(previewPath, 'utf8')
 const mediaScripts = readdirSync(resolve(root, 'media')).filter((file) => file.endsWith('.js'))
 
+const EXPECTED_SCRIPTS = ['export-runner.js', 'mermaid.js', 'preview.js']
 check(
-  'preview bundle is a single file',
-  `media/ contains: ${mediaScripts.join(', ')} (${size(previewPath)})`,
-  mediaScripts.length === 1 && mediaScripts[0] === 'preview.js'
+  'media ships exactly the expected scripts',
+  `media/ contains: ${mediaScripts.join(', ')}`,
+  EXPECTED_SCRIPTS.every((name) => mediaScripts.includes(name)) &&
+    mediaScripts.length === EXPECTED_SCRIPTS.length
+)
+check(
+  'the always-loaded preview script stays small',
+  `media/preview.js is ${size(previewPath)}; Mermaid lives in the lazily loaded media/mermaid.js`,
+  statSync(previewPath).size < 200 * 1024
+)
+check(
+  'Mermaid is not in the always-loaded script',
+  'every preview would otherwise parse ~3MB it may never need',
+  !/mermaid-js|MERMAID_DIAGRAM|dagre/i.test(preview)
 )
 check(
   'no runtime dynamic import survives bundling',
@@ -39,11 +51,21 @@ check(
   'the preview loads it as a classic script, not a module',
   !/^\s*(import|export)\s/m.test(preview)
 )
-check('mermaid is bundled in', 'searching for a mermaid runtime marker', /mermaid/i.test(preview))
+const mermaidChunk = readFileSync(resolve(root, 'media/mermaid.js'), 'utf8')
+check(
+  'the Mermaid chunk publishes itself as a global',
+  'it is injected as a classic script, so it cannot be imported',
+  mermaidChunk.includes('markdownVistaMermaid')
+)
 check(
   'mermaid runs in strict security mode',
   'securityLevel: strict — the preview sanitizes diagram output',
   preview.includes('strict')
+)
+check(
+  'the chunk loader carries the preview nonce',
+  'a nonce-based CSP would otherwise refuse the injected script',
+  preview.includes('nonce')
 )
 
 check(

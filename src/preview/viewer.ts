@@ -35,17 +35,22 @@ interface Bounds {
   height: number
 }
 
-type Content =
+type Content = (
   | { kind: 'svg'; markup: string; size: Size; name: string; exportable: true }
   | { kind: 'image'; src: string; size: Size; name: string; exportable: true }
   | { kind: 'html'; node: HTMLElement; size: Size; name: string; exportable: false }
+) & {
+  /** Mermaid definition behind the graphic, when there is one. */
+  source?: string
+}
 
 /**
  * Our own chrome. Everything inside it is UI, never document content — the
  * toolbar icons and outline carets are inline SVG, so without this they would
  * be collected as zoomable graphics and steal their own clicks.
  */
-export const OWN_UI_SELECTOR = '.markdown-vista-viewer, .markdown-vista-toc, .markdown-vista-toc-toggle'
+export const OWN_UI_SELECTOR =
+  '.markdown-vista-viewer, .markdown-vista-toc, .markdown-vista-toc-toggle, .markdown-vista-toc-scrim'
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
@@ -125,7 +130,8 @@ function graphicContent(node: HTMLElement): Content {
 
   if (node.tagName.toLowerCase() === 'svg') {
     const markup = node.outerHTML
-    return { kind: 'svg', markup, size: svgSize(markup), name, exportable: true }
+    const source = node.closest<HTMLElement>('.mermaid-diagram')?.dataset.mermaidSource
+    return { kind: 'svg', markup, size: svgSize(markup), name, exportable: true, source }
   }
 
   const rect = node.getBoundingClientRect()
@@ -213,6 +219,10 @@ class Viewer {
   private readonly zoomInButton: HTMLButtonElement
   private readonly zoomSelect: HTMLSelectElement
   private readonly exportButton: HTMLButtonElement
+  private readonly exportSvgButton: HTMLButtonElement
+  private readonly sourceButton: HTMLButtonElement
+  private readonly sourcePanel: HTMLElement
+  private readonly sourceCode: HTMLElement
   private readonly toast: HTMLDivElement
 
   private config: PreviewConfig = readConfig()
@@ -245,6 +255,8 @@ class Viewer {
             <select class="markdown-vista-viewer__zoom" aria-label="Zoom level"></select>
             <button type="button" class="markdown-vista-viewer__btn" data-action="zoom-in" title="Zoom in" aria-label="Zoom in">${ICONS.plus}</button>
             <button type="button" class="markdown-vista-viewer__btn" data-action="fit" title="Fit to view" aria-label="Fit to view">${ICONS.fit}</button>
+            <button type="button" class="markdown-vista-viewer__btn" data-action="source" title="Show the diagram source" aria-label="Show the diagram source">${ICONS.code}</button>
+            <button type="button" class="markdown-vista-viewer__btn" data-action="export-svg" title="Export as SVG" aria-label="Export as SVG">${ICONS.vector}</button>
             <button type="button" class="markdown-vista-viewer__btn" data-action="export" title="Export as PNG" aria-label="Export as PNG">${ICONS.download}</button>
             <button type="button" class="markdown-vista-viewer__btn markdown-vista-viewer__btn--close" data-action="close" title="Close (Esc)" aria-label="Close">${ICONS.close}</button>
           </div>
@@ -255,6 +267,13 @@ class Viewer {
             <div class="markdown-vista-viewer__minimap-canvas"></div>
             <div class="markdown-vista-viewer__minimap-viewport"></div>
           </div>
+        </div>
+        <div class="markdown-vista-viewer__source" hidden>
+          <div class="markdown-vista-viewer__source-head">
+            <span>Diagram source</span>
+            <button type="button" class="markdown-vista-viewer__btn" data-action="copy-source" title="Copy source" aria-label="Copy source">${ICONS.copy}</button>
+          </div>
+          <pre><code></code></pre>
         </div>
         <div class="markdown-vista-viewer__toast" hidden></div>
         ${RESIZE_DIRECTIONS.map(
@@ -284,6 +303,10 @@ class Viewer {
     this.zoomInButton = query('[data-action="zoom-in"]')
     this.zoomSelect = query('.markdown-vista-viewer__zoom')
     this.exportButton = query('[data-action="export"]')
+    this.exportSvgButton = query('[data-action="export-svg"]')
+    this.sourceButton = query('[data-action="source"]')
+    this.sourcePanel = query('.markdown-vista-viewer__source')
+    this.sourceCode = query('.markdown-vista-viewer__source code')
     this.toast = query('.markdown-vista-viewer__toast')
 
     this.zoomSelect.innerHTML =
@@ -311,6 +334,9 @@ class Viewer {
       else if (action === 'zoom-out') this.stepZoom(-1)
       else if (action === 'fit') this.setView({ zoom: 1, x: 0, y: 0 })
       else if (action === 'export') void this.exportPng()
+      else if (action === 'export-svg') void this.exportSvg()
+      else if (action === 'source') this.toggleSource()
+      else if (action === 'copy-source') void this.copySource()
     })
 
     this.zoomSelect.addEventListener('change', () => {
@@ -481,6 +507,10 @@ class Viewer {
     this.previousButton.disabled = index === 0
     this.nextButton.disabled = index === this.graphics.length - 1
     this.exportButton.hidden = this.config.pngExport === 'off' || !this.content.exportable
+    this.exportSvgButton.hidden = this.content.kind !== 'svg'
+    this.sourceButton.hidden = !this.content.source
+    this.sourcePanel.hidden = true
+    this.sourceCode.textContent = this.content.source ?? ''
     this.hideToast()
 
     this.canvas.replaceChildren(this.buildGraphic(this.content))
@@ -673,6 +703,51 @@ class Viewer {
   }
 
   // -- export --------------------------------------------------------------
+
+  /**
+   * Reviewing an architecture diagram usually ends in "how was this drawn" —
+   * the definition is right there on the container, so show it rather than
+   * making the reader hunt for the fence in the source file.
+   */
+  private toggleSource(): void {
+    this.sourcePanel.hidden = !this.sourcePanel.hidden
+    this.sourceButton.classList.toggle('markdown-vista-viewer__btn--active', !this.sourcePanel.hidden)
+  }
+
+  private async copySource(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.content?.source ?? '')
+      this.showToast('Diagram source copied.')
+    } catch {
+      this.showToast('Could not copy the source.')
+    }
+  }
+
+  /**
+   * SVG keeps the diagram editable and sharp at any size; PNG is for pasting
+   * into things that cannot take vectors.
+   */
+  private async exportSvg(): Promise<void> {
+    const content = this.content
+    if (!content || content.kind !== 'svg') return
+
+    const markup = content.markup.includes('xmlns=')
+      ? content.markup
+      : content.markup.replace(/^<svg\b/, '<svg xmlns="http://www.w3.org/2000/svg"')
+    const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n${markup}`], {
+      type: 'image/svg+xml'
+    })
+    const fileName = exportFileName(content.name, this.index + 1).replace(/\.png$/, '.svg')
+
+    triggerDownload(blob, fileName)
+    this.showToast(`Saving ${fileName}… If no dialog appeared:`, {
+      label: 'Copy to clipboard',
+      run: async () => {
+        await navigator.clipboard.writeText(markup)
+        this.showToast('SVG markup copied.')
+      }
+    })
+  }
 
   private async exportPng(): Promise<void> {
     const content = this.content

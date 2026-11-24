@@ -44,7 +44,7 @@
     <link rel="stylesheet" href="../media/preview.css" />
   </head>
   <body class="vscode-body vscode-dark">
-    <div id="markdown-vista-config" data-markdown-vista-config='{"viewerEnabled":true,"includeImages":true,"includeMath":true,"minimap":true,"mermaidEnabled":true,"pngExport":"auto"}' aria-hidden="true"></div>
+    <div id="markdown-vista-config" data-markdown-vista-config='{"viewerEnabled": true, "includeImages": true, "includeMath": true, "minimap": true, "mermaidEnabled": true, "pngExport": "auto", "tocEnabled": true, "tocOpenByDefault": false, "tocMaxLevel": 6, "tocJumpStrategy": "guard", "mermaidErrorDetails": true, "codeCopyButton": true, "codeFoldOver": 60, "readingMaxWidth": 0, "breadcrumbEnabled": true, "sectionFoldingEnabled": true}' aria-hidden="true"></div>
 
     <h1 class="code-line" data-line="0">Harness</h1>
 
@@ -70,6 +70,98 @@
     <p class="code-line" data-line="28">
       Extended syntax: <mark>marked</mark>, <ins>inserted</ins>, H<sub>2</sub>O, x<sup>2</sup>.
     </p>
+
+    <p class="code-line" data-line="29">
+      A document reference:
+      <a class="markdown-vista-doc-link" href="design.md" title="design.md">《design.md》</a>
+    </p>
+
+    <h2 class="code-line" data-line="30">Short code</h2>
+    <pre class="code-line" data-line="31"><code>const a = 1
+const b = 2
+console.log(a + b)</code></pre>
+
+    <h2 class="code-line" data-line="35">Long code</h2>
+    <pre class="code-line" data-line="36"><code>line 1 of a long configuration block
+line 2 of a long configuration block
+line 3 of a long configuration block
+line 4 of a long configuration block
+line 5 of a long configuration block
+line 6 of a long configuration block
+line 7 of a long configuration block
+line 8 of a long configuration block
+line 9 of a long configuration block
+line 10 of a long configuration block
+line 11 of a long configuration block
+line 12 of a long configuration block
+line 13 of a long configuration block
+line 14 of a long configuration block
+line 15 of a long configuration block
+line 16 of a long configuration block
+line 17 of a long configuration block
+line 18 of a long configuration block
+line 19 of a long configuration block
+line 20 of a long configuration block
+line 21 of a long configuration block
+line 22 of a long configuration block
+line 23 of a long configuration block
+line 24 of a long configuration block
+line 25 of a long configuration block
+line 26 of a long configuration block
+line 27 of a long configuration block
+line 28 of a long configuration block
+line 29 of a long configuration block
+line 30 of a long configuration block
+line 31 of a long configuration block
+line 32 of a long configuration block
+line 33 of a long configuration block
+line 34 of a long configuration block
+line 35 of a long configuration block
+line 36 of a long configuration block
+line 37 of a long configuration block
+line 38 of a long configuration block
+line 39 of a long configuration block
+line 40 of a long configuration block
+line 41 of a long configuration block
+line 42 of a long configuration block
+line 43 of a long configuration block
+line 44 of a long configuration block
+line 45 of a long configuration block
+line 46 of a long configuration block
+line 47 of a long configuration block
+line 48 of a long configuration block
+line 49 of a long configuration block
+line 50 of a long configuration block
+line 51 of a long configuration block
+line 52 of a long configuration block
+line 53 of a long configuration block
+line 54 of a long configuration block
+line 55 of a long configuration block
+line 56 of a long configuration block
+line 57 of a long configuration block
+line 58 of a long configuration block
+line 59 of a long configuration block
+line 60 of a long configuration block
+line 61 of a long configuration block
+line 62 of a long configuration block
+line 63 of a long configuration block
+line 64 of a long configuration block
+line 65 of a long configuration block
+line 66 of a long configuration block
+line 67 of a long configuration block
+line 68 of a long configuration block
+line 69 of a long configuration block
+line 70 of a long configuration block
+line 71 of a long configuration block
+line 72 of a long configuration block
+line 73 of a long configuration block
+line 74 of a long configuration block
+line 75 of a long configuration block
+line 76 of a long configuration block
+line 77 of a long configuration block
+line 78 of a long configuration block
+line 79 of a long configuration block
+line 80 of a long configuration block</code></pre>
 
     <h2 class="code-line" data-line="30">Architecture</h2>
     <p>Extension host renders, preview script enhances.</p>

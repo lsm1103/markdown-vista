@@ -1,6 +1,8 @@
 import * as vscode from 'vscode'
 import type MarkdownIt from 'markdown-it'
 import { applyMarkdownVistaPlugins } from './markdown-plugins'
+import { registerInsertToc } from './host/insert-toc'
+import { registerExportHtml } from './host/export-html'
 
 /**
  * The extension host side is deliberately tiny: everything it does is hand a
@@ -21,6 +23,9 @@ export function activate(context: vscode.ExtensionContext): unknown {
       )
     })
   )
+
+  registerInsertToc(context)
+  registerExportHtml(context)
 
   return {
     extendMarkdownIt(md: MarkdownIt): MarkdownIt {

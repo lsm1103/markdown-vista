@@ -2,6 +2,10 @@ import { readConfig } from './config'
 import { refreshMermaidTheme, renderMermaidBlocks } from './mermaid'
 import { collectGraphics, openViewer, OWN_UI_SELECTOR } from './viewer'
 import { syncToc } from './toc'
+import { syncBreadcrumb } from './breadcrumb'
+import { syncCodeBlocks } from './codeblocks'
+import { syncFolding } from './folding'
+import { syncReadingWidth } from './reading'
 import { diagnostics, guard } from './diagnostics'
 
 const ZOOMABLE_CLASS = 'markdown-vista-zoomable'
@@ -40,6 +44,12 @@ function refresh(): void {
         .catch((error: unknown) => guard('mermaid', () => { throw error }))
     })
     guard('zoomable', markZoomable)
+    guard('code', syncCodeBlocks)
+    guard('reading', syncReadingWidth)
+    // The breadcrumb reserves space at the top, so it settles the layout before
+    // anything measures a heading position.
+    guard('breadcrumb', syncBreadcrumb)
+    guard('folding', syncFolding)
     guard('toc', syncToc)
   }, REFRESH_DEBOUNCE_MS)
 }

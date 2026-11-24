@@ -1,5 +1,75 @@
 # Changelog
 
+## 0.6.0
+
+The full list of improvements from the review, in one release.
+
+**Performance**
+
+- Mermaid is no longer part of the script every preview loads. It moved into a
+  chunk that is injected only when a document actually contains a diagram, and
+  the always-loaded script went from **3.3 MB to 45 KB**.
+
+**Diagrams**
+
+- Upgraded to Mermaid 11, which brings the newer diagram types and fixes a
+  number of CJK label layout problems.
+- A diagram that fails to parse now shows Mermaid's own message and line number
+  instead of a generic "could not be rendered".
+- The viewer can show and copy the Mermaid source behind a diagram, and export
+  SVG as well as PNG.
+
+**Reading**
+
+- Copy button on every code block, and blocks longer than 60 lines fold away
+  until asked for.
+- A breadcrumb bar shows the path of the section being read; every level is
+  clickable.
+- A fold control on each heading collapses that section in the preview.
+  Deliberately independent of the drawer's collapsed branches — collapsing the
+  outline to navigate must never hide the text.
+- Optional cap on body-text width; code, tables and diagrams keep the full pane.
+
+**Navigation between documents**
+
+- Plain-text references to other Markdown files (`《design.md》` by default,
+  the pattern is configurable) become links. The rule runs before markdown-it's
+  linkify, which would otherwise read `design.md` as a website.
+
+**Commands**
+
+- `Export to Self-Contained HTML` — one file with diagrams rendered and images
+  inlined, for readers without VS Code.
+- `Insert Table of Contents` — a linked outline written into the document, for
+  renderers that have no drawer. Re-running updates the block in place.
+
+**Jump strategy**
+
+- `markdownVista.toc.jumpStrategy` switches between holding the scroll position
+  after a jump (the default) and handing navigation to the built-in preview's
+  own anchor handling. The guard is a defence, not a diagnosis; the setting is
+  there to find out which one your setup actually needs.
+
+## 0.5.0
+
+The table of contents is now a left drawer instead of a floating panel in the
+top-right corner — the placement every documentation tool uses, and the one
+readers expect.
+
+- **Left drawer.** On a wide preview it reserves space beside the text; on a
+  narrow one it floats over the text with a scrim, and closes itself after a
+  jump so the target is not hidden behind it. Drag the right edge to resize
+  (200–560px).
+- **Filter box.** Type to narrow the outline; matches keep their full ancestor
+  path so the section is still readable in context, and the matched substring is
+  highlighted. `↑` `↓` move, `Enter` jumps, `Esc` clears then closes.
+- **State is remembered** across previews and restarts: open state, width, and
+  which branches are collapsed (per document). A choice made by hand outranks
+  `markdownVista.toc.openByDefault`, so closing the drawer now sticks.
+- **The reading position survives opening and closing the drawer.** Reserving
+  space reflows the text, which used to move the section being read out from
+  under the reader.
+
 ## 0.4.0
 
 Heading navigation is now idempotent: the same entry lands in exactly the same

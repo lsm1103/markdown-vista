@@ -13,6 +13,8 @@ export const ICONS = {
   close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
   chevronLeft: svg('<path d="M15 5l-7 7 7 7"/>'),
   chevronRight: svg('<path d="M9 5l7 7-7 7"/>'),
+  code: svg('<path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/>'),
+  vector: svg('<path d="M6 4h12M4 6v12M20 6v12M6 20h12"/><rect x="3" y="3" width="3" height="3"/><rect x="18" y="3" width="3" height="3"/><rect x="3" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>'),
   copy: svg('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>'),
   list: svg('<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>'),
   collapseAll: svg('<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>'),

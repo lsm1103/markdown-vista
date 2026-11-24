@@ -24,10 +24,19 @@ export interface PreviewConfig {
   tocEnabled: boolean
   tocOpenByDefault: boolean
   tocMaxLevel: number
+  tocJumpStrategy: 'guard' | 'anchor'
+  mermaidErrorDetails: boolean
+  codeCopyButton: boolean
+  codeFoldOver: number
+  readingMaxWidth: number
+  breadcrumbEnabled: boolean
+  sectionFoldingEnabled: boolean
 }
 
 export const CONFIG_ELEMENT_ID = 'markdown-vista-config'
 export const MERMAID_CANDIDATE_CLASS = 'mermaid-diagram-candidate'
+/** Matches `《some-design.md》`; the capture group is the path to link to. */
+export const DEFAULT_DOC_LINK_PATTERN = '《([^》]+?\\.md)》'
 
 function readPreviewConfig(config: ConfigLike): PreviewConfig {
   return {
@@ -39,7 +48,14 @@ function readPreviewConfig(config: ConfigLike): PreviewConfig {
     pngExport: config.get<PreviewConfig['pngExport']>('viewer.pngExport', 'auto'),
     tocEnabled: config.get('toc.enabled', true),
     tocOpenByDefault: config.get('toc.openByDefault', false),
-    tocMaxLevel: config.get('toc.maxLevel', 6)
+    tocMaxLevel: config.get('toc.maxLevel', 6),
+    tocJumpStrategy: config.get<PreviewConfig['tocJumpStrategy']>('toc.jumpStrategy', 'guard'),
+    mermaidErrorDetails: config.get('mermaid.errorDetails', true),
+    codeCopyButton: config.get('code.copyButton', true),
+    codeFoldOver: config.get('code.foldOver', 60),
+    readingMaxWidth: config.get('reading.maxWidth', 0),
+    breadcrumbEnabled: config.get('breadcrumb.enabled', true),
+    sectionFoldingEnabled: config.get('sectionFolding.enabled', true)
   }
 }
 
@@ -78,6 +94,84 @@ function installMermaidFence(md: MarkdownIt, getConfig: () => ConfigLike): void 
 }
 
 /**
+ * Turns a plain-text reference to another Markdown file into a link.
+ *
+ * Teams settle on a convention for citing sibling documents — `《design.md》`
+ * here — and those references stay dead text in every renderer. Resolving them
+ * is what turns a folder of documents into something navigable.
+ */
+function installDocumentLinks(md: MarkdownIt, getConfig: () => ConfigLike): void {
+  // Before `linkify`, which would otherwise see `design.md` as a bare domain
+  // and turn the reference into a link to a website that does not exist.
+  md.core.ruler.before('linkify', 'markdown_vista_doc_links', (state) => {
+    const config = getConfig()
+    if (!config.get('docLinks.enabled', true)) return
+
+    let pattern: RegExp
+    try {
+      pattern = new RegExp(config.get('docLinks.pattern', DEFAULT_DOC_LINK_PATTERN), 'g')
+    } catch {
+      return // an invalid user pattern must not break rendering
+    }
+
+    for (const token of state.tokens) {
+      if (token.type !== 'inline' || !token.children) continue
+
+      const rewritten: typeof token.children = []
+      let insideLink = 0
+      let changed = false
+
+      for (const child of token.children) {
+        if (child.type === 'link_open') insideLink++
+        if (child.type === 'link_close') insideLink--
+        // Never rewrite inside an existing link, and code spans are their own
+        // token type, so they are never touched either.
+        if (child.type !== 'text' || insideLink > 0) {
+          rewritten.push(child)
+          continue
+        }
+
+        pattern.lastIndex = 0
+        let cursor = 0
+        let match: RegExpExecArray | null
+
+        while ((match = pattern.exec(child.content)) !== null) {
+          if (match[0].length === 0) break // a pattern matching nothing would loop
+          const target = match[1] ?? match[0]
+          if (!target) break
+          changed = true
+
+          if (match.index > cursor) {
+            const before = new state.Token('text', '', 0)
+            before.content = child.content.slice(cursor, match.index)
+            rewritten.push(before)
+          }
+
+          const open = new state.Token('link_open', 'a', 1)
+          open.attrSet('href', encodeURI(target))
+          open.attrSet('class', 'markdown-vista-doc-link')
+          open.attrSet('title', target)
+          const text = new state.Token('text', '', 0)
+          text.content = match[0]
+          rewritten.push(open, text, new state.Token('link_close', 'a', -1))
+
+          cursor = match.index + match[0].length
+        }
+
+        if (cursor === 0) rewritten.push(child)
+        else if (cursor < child.content.length) {
+          const rest = new state.Token('text', '', 0)
+          rest.content = child.content.slice(cursor)
+          rewritten.push(rest)
+        }
+      }
+
+      if (changed) token.children = rewritten
+    }
+  })
+}
+
+/**
  * The preview script cannot read VS Code settings (it has no API bridge — the
  * built-in preview already consumed `acquireVsCodeApi()`), so the current
  * settings ride along inside the rendered HTML as a data attribute.
@@ -112,6 +206,7 @@ export function applyMarkdownVistaPlugins(md: MarkdownIt, getConfig: () => Confi
   }
 
   installMermaidFence(md, getConfig)
+  installDocumentLinks(md, getConfig)
   installConfigBridge(md, getConfig)
   return md
 }

@@ -1,0 +1,189 @@
+/* Styles for exported HTML only.
+   `preview.css` is written against --vscode-* tokens, which do not exist
+   outside VS Code, so the export defines them here with a fixed palette and
+   adds the base document typography the built-in preview would have supplied. */
+
+:root {
+  --vscode-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial,
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --vscode-font-size: 15px;
+  --vscode-editor-font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --vscode-foreground: #1f2328;
+  --vscode-editor-foreground: #1f2328;
+  --vscode-editor-background: #ffffff;
+  --vscode-editorWidget-background: #f6f8fa;
+  --vscode-sideBar-background: #f6f8fa;
+  --vscode-sideBar-foreground: #1f2328;
+  --vscode-panel-border: #d0d7de;
+  --vscode-widget-border: #d0d7de;
+  --vscode-focusBorder: #0969da;
+  --vscode-textLink-foreground: #0969da;
+  --vscode-textCodeBlock-background: #f6f8fa;
+  --vscode-toolbar-hoverBackground: #eaeef2;
+  --vscode-list-hoverBackground: #eaeef2;
+  --vscode-list-activeSelectionBackground: #ddf4ff;
+  --vscode-editor-findMatchHighlightBackground: #fff8c5;
+  --vscode-editorWarning-foreground: #9a6700;
+  --vscode-inputValidation-errorBackground: #ffebe9;
+  --vscode-inputValidation-errorBorder: #cf222e;
+  --vscode-button-background: #1f6feb;
+  --vscode-button-foreground: #ffffff;
+  --vscode-input-background: #ffffff;
+  --vscode-input-foreground: #1f2328;
+  --vscode-input-border: #d0d7de;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vscode-foreground: #e6edf3;
+    --vscode-editor-foreground: #e6edf3;
+    --vscode-editor-background: #0d1117;
+    --vscode-editorWidget-background: #161b22;
+    --vscode-sideBar-background: #161b22;
+    --vscode-sideBar-foreground: #e6edf3;
+    --vscode-panel-border: #30363d;
+    --vscode-widget-border: #30363d;
+    --vscode-textLink-foreground: #4493f8;
+    --vscode-textCodeBlock-background: #161b22;
+    --vscode-toolbar-hoverBackground: #21262d;
+    --vscode-list-hoverBackground: #21262d;
+    --vscode-list-activeSelectionBackground: #163356;
+    --vscode-editor-findMatchHighlightBackground: #453a10;
+    --vscode-inputValidation-errorBackground: #3c1618;
+    --vscode-input-background: #0d1117;
+    --vscode-input-foreground: #e6edf3;
+    --vscode-input-border: #30363d;
+  }
+}
+
+body.markdown-vista-export {
+  margin: 0;
+  padding: 32px 20px 96px;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  line-height: 1.6;
+}
+
+.markdown-vista-export .markdown-body {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.markdown-vista-export h1,
+.markdown-vista-export h2,
+.markdown-vista-export h3,
+.markdown-vista-export h4,
+.markdown-vista-export h5,
+.markdown-vista-export h6 {
+  margin: 1.6em 0 0.6em;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.markdown-vista-export h1 {
+  font-size: 1.9em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.markdown-vista-export h2 {
+  font-size: 1.45em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.markdown-vista-export h3 { font-size: 1.2em; }
+.markdown-vista-export h4 { font-size: 1.05em; }
+
+.markdown-vista-export p,
+.markdown-vista-export ul,
+.markdown-vista-export ol,
+.markdown-vista-export blockquote,
+.markdown-vista-export table {
+  margin: 0 0 1em;
+}
+
+.markdown-vista-export a {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: none;
+}
+
+.markdown-vista-export a:hover {
+  text-decoration: underline;
+}
+
+.markdown-vista-export code {
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--vscode-textCodeBlock-background);
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.9em;
+}
+
+.markdown-vista-export pre {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--vscode-textCodeBlock-background);
+  overflow-x: auto;
+}
+
+.markdown-vista-export pre code {
+  padding: 0;
+  background: none;
+  font-size: 0.88em;
+  line-height: 1.5;
+}
+
+.markdown-vista-export blockquote {
+  padding: 0 1em;
+  border-left: 0.25em solid var(--vscode-panel-border);
+  opacity: 0.85;
+}
+
+.markdown-vista-export table {
+  border-collapse: collapse;
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.markdown-vista-export th,
+.markdown-vista-export td {
+  padding: 6px 13px;
+  border: 1px solid var(--vscode-panel-border);
+}
+
+.markdown-vista-export th {
+  background: var(--vscode-textCodeBlock-background);
+  font-weight: 600;
+}
+
+.markdown-vista-export img {
+  max-width: 100%;
+}
+
+.markdown-vista-export hr {
+  height: 1px;
+  border: none;
+  background: var(--vscode-panel-border);
+  margin: 2em 0;
+}
+
+/* Interactive affordances have no behaviour in a static file. */
+.markdown-vista-export .markdown-vista-toc,
+.markdown-vista-export .markdown-vista-toc-toggle,
+.markdown-vista-export .markdown-vista-toc-scrim,
+.markdown-vista-export .markdown-vista-viewer,
+.markdown-vista-export .markdown-vista-breadcrumb,
+.markdown-vista-export .markdown-vista-code__button,
+.markdown-vista-export .markdown-vista-fold {
+  display: none !important;
+}
+
+.markdown-vista-export .markdown-vista-zoomable {
+  cursor: default;
+}
